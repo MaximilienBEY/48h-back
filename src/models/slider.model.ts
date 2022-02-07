@@ -37,3 +37,4 @@ export default class Slider extends Model<ModelAttribute<SliderAttributes>, Omit
     
     getGroupSliders = async (): Promise<GroupSlider[]> => GroupSlider.findAll({where: {sliderId: this.id}})
 }
+
