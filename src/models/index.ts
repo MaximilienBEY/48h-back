@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize-typescript"
-import Access from "./access.model"
+import Group from "./group.model"
+import Slider from "./slider.model"
 import User from "./user.model"
 
 export type ModelAttribute<Attribute> = Attribute & {
@@ -18,7 +19,8 @@ const sequelize = new Sequelize({
 
 sequelize.addModels([
     User,
-    Access
+    Group,
+    Slider,
 ])
 
 export default sequelize

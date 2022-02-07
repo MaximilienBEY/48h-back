@@ -1,6 +1,6 @@
 import { Table, Model, AllowNull, Column, HasMany, ForeignKey } from 'sequelize-typescript'
 import { ModelAttribute } from '.'
-import Access from './access.model'
+import Access from './slider.model'
 
 export interface UserAttributes {
     id: number
@@ -24,9 +24,4 @@ export default class User extends Model<ModelAttribute<UserAttributes>, Omit<Use
     @AllowNull(false)
     @Column
     password!: string
-
-    @HasMany(() => Access, {
-        onDelete: "CASCADE"
-    })
-    getAccesses = async (): Promise<Access[]> => Access.findAll({where: {userId: this.id}})
 }

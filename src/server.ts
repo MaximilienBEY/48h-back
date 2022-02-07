@@ -4,10 +4,12 @@ import * as core from "express-serve-static-core"
 import * as cors from "cors"
 import * as http from "http"
 import database from "./models"
+import Seed from "./seeders"
 
 type AppOption = {
     port?: number
     logging?: boolean
+    force?: boolean
 }
 
 export default class Server {
@@ -17,16 +19,18 @@ export default class Server {
     private server?: http.Server
     private port: number
     private logging: boolean = true
+    private force: boolean = false
 
     constructor(routers: core.Router[], option?: AppOption) {
         this.port = option?.port || 8000
-        this.logging = option?.logging !== undefined ? option?.logging : this.logging
+        this.logging = option?.logging ?? this.logging
+        this.force = option?.force ?? this.force
         this.routers = routers
         this.app = express()
     }
 
     private async initializeDatabase() {
-        await database.sync({ force: true, logging: this.logging })
+        await database.sync({ force: this.force, logging: this.logging })
         this.logging && console.log("Database connected!")
     }
 
@@ -47,8 +51,13 @@ export default class Server {
         this.server = this.app.listen(this.port, () => this.logging && console.log(`Server listening on port ${this.port}!`))
 
         await this.initializeDatabase()
+        await this.seed()
         this.initializeMiddlewares()
         this.initializeRouter()
+    }
+
+    public async seed() {
+        await Seed()
     }
 
     public async close() {

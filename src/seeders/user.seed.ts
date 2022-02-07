@@ -1,10 +1,10 @@
-import Role from "../models/role.model"
+import { hashSync } from "bcrypt"
+import User from "../models/user.model"
 
 export default async () => {
-    await Role.create({
-        label: "ADMINISTRATOR"
-    })
-    await Role.create({
-        label: "USER"
+    await User.create({
+        username: "admin",
+        email: "admin@admin.fr",
+        password: hashSync("admin", 10),
     })
 }
