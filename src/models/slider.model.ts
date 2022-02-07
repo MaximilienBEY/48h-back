@@ -1,15 +1,14 @@
-import { Table, Model, AllowNull, Column, ForeignKey } from 'sequelize-typescript'
+import { Table, Model, AllowNull, Column, ForeignKey, HasMany } from 'sequelize-typescript'
 import { ModelAttribute } from '.'
 import Group from './group.model'
+import GroupSlider from './group.slider.model'
 
 export interface SliderAttributes {
     id: number
+    label: string
     title: string
-    mediaType: string
-    mediaSource: string;
-
-    groupId: number
-
+    mediaType: "image" | "video"
+    mediaSource: string
 }
 
 @Table({
@@ -18,15 +17,23 @@ export interface SliderAttributes {
 export default class Slider extends Model<ModelAttribute<SliderAttributes>, Omit<SliderAttributes, "id">> {
     @AllowNull(false)
     @Column
-    session!: string
+    label!: string
     
     @AllowNull(false)
     @Column
-    refresh!: string
+    title!: string
     
-    @ForeignKey(() => Group)
+    @AllowNull(false)
     @Column
-    groupId!: number
+    mediaType!: string
+    
+    @AllowNull(false)
+    @Column
+    mediaSource!: string    
 
-    getGroup = async (): Promise<Group|null> => Group.findOne({where: {id: this.groupId}})
+    @HasMany(() => GroupSlider, {
+        onDelete: "CASCADE"
+    })
+    
+    getGroupSliders = async (): Promise<GroupSlider[]> => GroupSlider.findAll({where: {sliderId: this.id}})
 }
