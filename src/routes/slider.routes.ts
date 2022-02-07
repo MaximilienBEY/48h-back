@@ -7,9 +7,9 @@ export default (): core.Router => {
     const Controller = new SliderController()
 
     router.post("/sliders", Controller.createSlider)
-
-    // router.post("/auth/login", Controller.handleLogin)
-    // router.get("/auth/me", [AuthMiddleware], Controller.handleMe)
+    router.get("/sliders/:id", Controller.editSlider)
+    router.put("/sliders/:id", Controller.editSlider)
+    router.delete("/sliders/:id", Controller.deleteSlider)
 
     return router
 }
