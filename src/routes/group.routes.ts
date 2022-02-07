@@ -6,8 +6,8 @@ export default (): core.Router => {
     const router: core.Router = Router()
     const Controller = new GroupController()
 
-    // router.post("/auth/login", Controller.handleLogin)
-    // router.get("/auth/me", [AuthMiddleware], Controller.handleMe)
+    router.get("/group/getGroups", Controller.getGroups)
+    router.get("/group/getGroup/:id", Controller.getGroup)
 
     return router
 }

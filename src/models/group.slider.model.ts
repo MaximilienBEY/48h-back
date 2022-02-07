@@ -6,7 +6,6 @@ import Slider from './slider.model'
 export interface GroupSliderAttributes {
     id: number
     position: number;
-
     groupId: number;
     sliderId: number;
 }
