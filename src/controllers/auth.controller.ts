@@ -6,7 +6,7 @@ import { generateToken, loginVerification, registerVerification } from "../utils
 import Access from "../models/slider.model"
 import { getUser, REFRESH_EXPIRATION, SIGNATURE } from "../utils/auth.utils"
 
-export default class AdminController {
+export default class AuthController {
 
     // public createUser = async (attribute: UserCreationAttribute): Promise<User|null> => {
     //     let password = hashSync(attribute.password, 10)
@@ -20,7 +20,6 @@ export default class AdminController {
     // }
 
     public handleLogin = async (req: Request, res: Response): Promise<any> => {
-        console.log(req.body)
         let errors = await loginVerification(req)
         if (errors.length) return res.status(400).json({ type: "error", errors })
 

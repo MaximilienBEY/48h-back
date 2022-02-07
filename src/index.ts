@@ -1,6 +1,6 @@
 import Server from "./server"
 import authRoutes from "./routes/group.routes"
-import adminRoutes from "./routes/admin.routes"
+import adminRoutes from "./routes/auth.routes"
 
 const server = new Server([
     authRoutes(),

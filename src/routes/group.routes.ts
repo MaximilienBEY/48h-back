@@ -1,7 +1,6 @@
 import GroupController from "../controllers/group.controller"
 import { Router } from "express"
 import * as core from 'express-serve-static-core'
-import { AdminMiddleware } from "../middlewares/admin.middleware"
 
 export default (): core.Router => {
     const router: core.Router = Router()
