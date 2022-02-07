@@ -3,6 +3,7 @@ import * as cookieParser from "cookie-parser"
 import * as core from "express-serve-static-core"
 import * as cors from "cors"
 import * as http from "http"
+import * as fileUpload from "express-fileupload"
 import database from "./models"
 import Seed from "./seeders"
 
@@ -41,6 +42,7 @@ export default class Server {
         this.app.use(cors({
             origin: "*"
         }))
+        this.app.use(fileUpload())
     }
 
     private initializeRouter() {
