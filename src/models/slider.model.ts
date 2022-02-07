@@ -4,12 +4,10 @@ import Group from './group.model'
 
 export interface SliderAttributes {
     id: number
+    label: string
     title: string
-    mediaType: string
-    mediaSource: string;
-
-    groupId: number
-
+    mediaType: "image" | "video"
+    mediaSource: string
 }
 
 @Table({
@@ -18,11 +16,19 @@ export interface SliderAttributes {
 export default class Slider extends Model<ModelAttribute<SliderAttributes>, Omit<SliderAttributes, "id">> {
     @AllowNull(false)
     @Column
-    session!: string
+    label!: string
     
     @AllowNull(false)
     @Column
-    refresh!: string
+    title!: string
+    
+    @AllowNull(false)
+    @Column
+    mediaType!: string
+    
+    @AllowNull(false)
+    @Column
+    mediaSource!: string
     
     @ForeignKey(() => Group)
     @Column

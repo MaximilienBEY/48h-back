@@ -1,12 +1,14 @@
 import Server from "./server"
-import authRoutes from "./routes/group.routes"
-import adminRoutes from "./routes/auth.routes"
+import groupRoutes from "./routes/group.routes"
+import authRoutes from "./routes/auth.routes"
+import sliderRoutes from "./routes/slider.routes"
 
 const server = new Server([
+    groupRoutes(),
     authRoutes(),
-    adminRoutes()
+    sliderRoutes()
 ], {
-    logging: true,
+    logging: false,
     force: true
 })
 

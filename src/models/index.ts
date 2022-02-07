@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize-typescript"
 import Group from "./group.model"
+import GroupSlider from "./group.slider.model"
 import Slider from "./slider.model"
 import User from "./user.model"
 
@@ -21,6 +22,7 @@ sequelize.addModels([
     User,
     Group,
     Slider,
+    GroupSlider
 ])
 
 export default sequelize
