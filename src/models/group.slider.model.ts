@@ -1,4 +1,4 @@
-import { Table, Model, AllowNull, Column, ForeignKey } from 'sequelize-typescript'
+import { Table, Model, AllowNull, Column, ForeignKey, BelongsTo } from 'sequelize-typescript'
 import { ModelAttribute } from '.'
 import Group from './group.model'
 import Slider from './slider.model'
@@ -28,6 +28,6 @@ export default class GroupSlider extends Model<ModelAttribute<GroupSliderAttribu
     @ForeignKey(() => Slider)
     @Column
     sliderId!: number
-
+    
     getSlider = async (): Promise<Slider|null> => Slider.findOne({where: {id: this.sliderId}})
 }
