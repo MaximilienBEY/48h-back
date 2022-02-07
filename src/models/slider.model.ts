@@ -34,7 +34,6 @@ export default class Slider extends Model<ModelAttribute<SliderAttributes>, Omit
     @HasMany(() => GroupSlider, {
         onDelete: "CASCADE"
     })
-    
     getGroupSliders = async (): Promise<GroupSlider[]> => GroupSlider.findAll({where: {sliderId: this.id}})
 }
 

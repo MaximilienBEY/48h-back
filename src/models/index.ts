@@ -10,12 +10,11 @@ export type ModelAttribute<Attribute> = Attribute & {
 }
 
 const sequelize = new Sequelize({
-    database: '48h_database',
+    database: 'ekip',
     dialect: 'mysql',
     username: 'root',
     password: 'root',
     host: "localhost",
-    port: 8889,
     logging: false
 })
 

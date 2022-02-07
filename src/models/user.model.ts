@@ -1,8 +1,5 @@
-
-   
 import { Table, Model, AllowNull, Column, HasMany, ForeignKey } from 'sequelize-typescript'
 import { ModelAttribute } from '.'
-import Access from './slider.model'
 
 export interface UserAttributes {
     id: number

@@ -23,20 +23,11 @@ export default class GroupSlider extends Model<ModelAttribute<GroupSliderAttribu
     @Column
     groupId!: number
 
-
-    @BelongsTo(() => Group, {
-        onDelete: "CASCADE"
-    })
-
     getGroup = async (): Promise<Group|null> => Group.findOne({where: {id: this.groupId}})
     
     @ForeignKey(() => Slider)
     @Column
     sliderId!: number
-
-    @BelongsTo(() => Slider, {
-        onDelete: "CASCADE"
-    })
-
+    
     getSlider = async (): Promise<Slider|null> => Slider.findOne({where: {id: this.sliderId}})
 }

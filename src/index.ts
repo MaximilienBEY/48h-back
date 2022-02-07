@@ -8,8 +8,8 @@ const server = new Server([
     authRoutes(),
     sliderRoutes()
 ], {
-    logging: false,
-    // force: true
+    logging: true,
+    force: true
 })
 
 server.listen()

@@ -5,7 +5,7 @@ import { sliderVerification } from "../utils/verifications"
 import { randomUUID } from "crypto"
 
 export default class SliderController {
-    public async createSlider(req: Request, res: Response) {
+    public createSlider = async (req: Request, res: Response) => {
         let errors = await sliderVerification(req)
         if (errors.length) return res.status(400).json({ type: "error", errors })
         if (!req.files || !req.files["media"]) return res.status(400).json({ type: "error", errors: ["Le media est obligatoire."] })
@@ -31,7 +31,7 @@ export default class SliderController {
             slider
         })
     }
-    public async getSlider(req: Request, res: Response) {
+    public getSlider = async (req: Request, res: Response) => {
         let slider = await Slider.findByPk(req.params.id)
         if (!slider) return res.status(400).json({ type: "error", errors: ["Le slider n'existe pas."] })
         
@@ -40,7 +40,7 @@ export default class SliderController {
             slider
         })
     }
-    public async editSlider(req: Request, res: Response) {
+    public editSlider = async (req: Request, res: Response) => {
         let slider = await Slider.findByPk(req.params.id)
         if (!slider) return res.status(400).json({ type: "error", errors: ["Le slider n'existe pas."] })
 
@@ -65,7 +65,7 @@ export default class SliderController {
             slider
         })
     }
-    public async deleteSlider(req: Request, res: Response) {
+    public deleteSlider = async (req: Request, res: Response) => {
         let slider = await Slider.findByPk(req.params.id)
         if (!slider) return res.status(400).json({ type: "error", errors: ["Le slider n'existe pas."] })
 

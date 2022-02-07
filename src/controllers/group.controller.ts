@@ -1,92 +1,123 @@
 import { Request, Response } from "express"
-import { hashSync, compareSync } from "bcrypt"
-import * as jwt from "jsonwebtoken"
 import Group from "../models/group.model"
 import GroupSlider from "../models/group.slider.model"
 import Slider from "../models/slider.model"
-import { generateToken, loginVerification } from "../utils/verifications"
-import Access, { SliderAttributes } from "../models/slider.model"
-import { REFRESH_EXPIRATION, SIGNATURE } from "../utils/auth.utils"
-import Group from "../models/group.model"
-import Slider from "../models/slider.model"
-
-interface SliderValues extends SliderAttributes {
-    position: number;
-    createdAt: Date;
-    updatedAt: Date;
-}
+import { editGroupVerification, groupVerification } from "../utils/verifications"
+import { SliderAttributes } from "../models/slider.model"
 
 export default class GroupController {
 
     public getGroups = async (req: Request, res: Response): Promise<any> => {
- 
-        Group.findAll({
-            include: [{
-                model: GroupSlider,
-                attributes: ['id','groupId', 'sliderId', 'position'],
-                include: [{
-                    model: Slider,
-                    attributes: ['id', 'label', 'title', 'mediaType', 'mediaSource', 'createdAt', 'updatedAt']
-                }]
-            }]
-        }).then(async function (groups) {
-                if (groups) {
-                    return res.status(200).json({type: 'success', groups: groups});
-                } 
+        let groups = await Group.findAll()
+
+        res.json({
+            type: "success",
+            groups
+        })
+    }
+
+    public detailGroup = async (req: Request, res: Response): Promise<any> => {
+        let group = await Group.findByPk(req.params.id)
+        if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
+
+        let gSliders = await group.getGroupSliders()
+        let sliders = await Promise.all(gSliders.map(async gSlider => {
+            let slider = await gSlider.getSlider() as Slider
+            return {
+                position: gSlider.position,
+                id: slider.id as number,
+                label: slider.label,
+                title: slider.title,
+                mediaType: slider.mediaType as SliderAttributes["mediaType"],
+                mediaSource: slider.mediaSource,
+                createdAt: slider.createdAt,
+                updatedAt: slider.updatedAt
+            }
+        }))
+
+        res.json({
+            type: "success",
+            group: {
+                ...group.toJSON(),
+                sliders: sliders.sort((a, b) => a.position - b.position)
+            }
+        })
+    }
+
+    public createGroup = async (req: Request, res: Response): Promise<any> => {
+        let errors = await groupVerification(req)
+        if (errors.length) return res.status(400).json({ type: "error", errors })
+
+        let group = await Group.create({
+            label: req.body.label
+        })
+        await Promise.all((req.body.sliders as number[]).map(async (id, i) => {
+            let slider = await Slider.findByPk(id)
+            if (!slider) return
+
+            await GroupSlider.create({
+                position: i,
+                groupId: group.id,
+                sliderId: slider.id
             })
-            .catch(function (err: string) {
-                console.log(err);
-                return res.status(500).json({type: 'error', error: err});
-            });
+        }))
+
+        res.json({
+            type: "success",
+            message: "Le groupe a bien été créé."
+        })
     }
 
-    public getGroup = async (req: Request, res: Response): Promise<any> => {
- 
-        const idGroup = req.params.id;
+    public editGroup = async (req: Request, res: Response): Promise<any> => {
+        let group = await Group.findByPk(req.params.id)
+        if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
 
-        // console.log(idGroup);
-        
-        if (idGroup == ':id'){
-            return res.status(400).json({type: "erreur", "message" : "Invalid group Id"});
-        }
+        let errors = await editGroupVerification(req)
+        if (errors.length) return res.status(400).json({ type: "error", errors })
 
-        Group.findOne({
-             include: [{
-                model: GroupSlider,
-                attributes: ['id','groupId', 'sliderId', 'position'],
-                include: [{
-                    model: Slider,
-                    attributes: ['id', 'label', 'title', 'mediaType', 'mediaSource', 'createdAt', 'updatedAt']
-                }]
-            }],
-            where: { id: idGroup },
-        }).then(async function (group) {
-            if (group) {
-                return res.status(200).json({type: 'success', group: group});
-            } 
-        }).catch(function (err: string) {
-            console.log(err);
-            return res.status(500).json({type: 'error', error: err});
-        });
+        if (req.body.label) group.label = req.body.label
+
+        let s = req.body.sliders as number[]
+        let gSliders = await group.getGroupSliders()
+        await Promise.all(gSliders.map(async gSlider => !s.includes(gSlider.id) && gSlider.destroy()))
+
+        await Promise.all(s.map(async (id, i) => {
+            let slider = await Slider.findByPk(id)
+            if (!slider || !group) return
+
+            let gSlider = await GroupSlider.findOne({
+                where: {
+                    sliderId: slider.id,
+                    groupId: group.id
+                }
+            })
+            if (gSlider) {
+                gSlider.position = i
+                await gSlider.save()
+            } else {
+                await GroupSlider.create({
+                    position: i,
+                    groupId: group.id,
+                    sliderId: slider.id
+                })
+            }
+        }))
+
+        res.json({
+            type: "success",
+            message: "Le groupe a bien été modifié."
+        })
     }
 
-    // public async getSlider() {
-    //     let group = await Group.findByPk(1)
-    //     if (!group) return
+    public deleteGroup = async (req: Request, res: Response): Promise<any> => {
+        let group = await Group.findByPk(req.params.id)
+        if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
 
-    //     let sliders: SliderValues[] = await Promise.all((await group.getGroupSliders()).map(async gSlider => {
-    //         let slider = await gSlider.getSlider() as Slider
-    //         return {
-    //             position: gSlider.position,
-    //             id: slider.id,
-    //             label: slider.label,
-    //             title: slider.title,
-    //             mediaType: slider.mediaType as SliderValues["mediaType"],
-    //             mediaSource: slider.mediaSource,
-    //             createdAt: slider.createdAt,
-    //             updatedAt: slider.updatedAt
-    //         }
-    //     }))
-    // }
+        await group.destroy()
 
+        res.json({
+            type: "success",
+            message: "Groupe supprimé avec succès."
+        })
+    }
 }
