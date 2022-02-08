@@ -27,7 +27,7 @@ export default class GroupController {
 
     public detailGroup = async (req: Request, res: Response): Promise<any> => {
         let group = await Group.findByPk(req.params.id)
-        if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
+        if (!group) return res.status(400).json({ type: "error", errors: ["The group doesn't exist."] })
 
         let gSliders = await group.getGroupSliders()
         let sliders = await Promise.all(gSliders.map(async gSlider => {
@@ -82,7 +82,7 @@ export default class GroupController {
 
     public editGroup = async (req: Request, res: Response): Promise<any> => {
         let group = await Group.findByPk(req.params.id)
-        if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
+        if (!group) return res.status(400).json({ type: "error", errors: ["The group doesn't exist."] })
 
         let errors = await editGroupVerification(req)
         if (errors.length) return res.status(400).json({ type: "error", errors })
@@ -120,13 +120,13 @@ export default class GroupController {
 
         res.json({
             type: "success",
-            message: "Le groupe a bien été modifié."
+            message: "Group successfully edited."
         })
     }
 
     public deleteGroup = async (req: Request, res: Response): Promise<any> => {
         let group = await Group.findByPk(req.params.id)
-        if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
+        if (!group) return res.status(400).json({ type: "error", errors: ["The group doesn't exist."] })
 
         await group.destroy()
 
@@ -134,7 +134,7 @@ export default class GroupController {
 
         res.json({
             type: "success",
-            message: "Groupe supprimé avec succès."
+            message: "Group successfully deleted."
         })
     }
 }

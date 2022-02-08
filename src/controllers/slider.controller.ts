@@ -15,15 +15,15 @@ export default class SliderController {
     public createSlider = async (req: Request, res: Response) => {
         let errors = await sliderVerification(req)
         if (errors.length) return res.status(400).json({ type: "error", errors })
-        if (!req.body.title && (!req.files || !req.files["media"])) return res.status(400).json({type: "error", errors: ["Le titre ou le média est obligatoire."]})
+        if (!req.body.title && (!req.files || !req.files["media"])) return res.status(400).json({type: "error", errors: ["Title or media is required."]})
 
         let mediaName: string | undefined = undefined
         let mediaType: "image" | "video" | undefined = undefined 
 
         if (req.files && req.files["media"]) {
             let media = req.files["media"]
-            if (Array.isArray(media)) return res.status(400).json({ type: "error", errors: ["Le media ne doit contenir qu'un fichier."] })
-            if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["Le media ne peut être qu'une image ou vidéo."] })
+            if (Array.isArray(media)) return res.status(400).json({ type: "error", errors: ["Media need to contains only one file."] })
+            if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["The media need to be an image or a video."] })
             
             let extension = media.name.split(".").pop()
             mediaName = `${randomUUID()}${extension ? `.${extension}` : ""}`
@@ -52,7 +52,7 @@ export default class SliderController {
     }
     public getSlider = async (req: Request, res: Response) => {
         let slider = await Slider.findByPk(req.params.id)
-        if (!slider) return res.status(400).json({ type: "error", errors: ["Le slider n'existe pas."] })
+        if (!slider) return res.status(400).json({ type: "error", errors: ["The slider doesn't exist."] })
         
         res.send({
             type: "success",
@@ -61,14 +61,14 @@ export default class SliderController {
     }
     public editSlider = async (req: Request, res: Response) => {
         let slider = await Slider.findByPk(req.params.id)
-        if (!slider) return res.status(400).json({ type: "error", errors: ["Le slider n'existe pas."] })
+        if (!slider) return res.status(400).json({ type: "error", errors: ["The slider doesn't exist."] })
 
         if (req.body.label) slider.label = req.body.label
         if (req.body.title) slider.title = req.body.title
         
         let media = req.files?.media
         if (media && !Array.isArray(media)) {
-            if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["Le media ne peut être qu'une image ou vidéo."] })
+            if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["The media need to be an image or a video."] })
 
             let extension = media.name.split(".").pop()
             let mediaName = `${slider.mediaSource ? slider.mediaSource.split(".").shift() : randomUUID()}${extension ? `.${extension}` : ""}`
@@ -95,13 +95,13 @@ export default class SliderController {
     }
     public deleteSlider = async (req: Request, res: Response) => {
         let slider = await Slider.findByPk(req.params.id)
-        if (!slider) return res.status(400).json({ type: "error", errors: ["Le slider n'existe pas."] })
+        if (!slider) return res.status(400).json({ type: "error", errors: ["The slider doesn't exist."] })
 
         await slider.destroy()
         // emit
         res.send({
             type: "success",
-            message: "Slider supprimé avec succès."
+            message: "Slider successfully deleted."
         })
     }
 }

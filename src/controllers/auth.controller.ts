@@ -15,7 +15,7 @@ export default class AuthController {
         let password: string = req.body.password
 
         let user = await User.findOne({ where: { email } })
-        if (!user || !compareSync(password, user.password)) return res.status(400).json({ type: "error", errors: ["Email ou mot de passe invalide."] })
+        if (!user || !compareSync(password, user.password)) return res.status(400).json({ type: "error", errors: ["Email or password incorrect."] })
 
         return res.json({ type: "success", token: jwt.sign({ userId: user.id }, SIGNATURE) })
     }
