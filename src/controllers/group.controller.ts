@@ -4,15 +4,24 @@ import GroupSlider from "../models/group.slider.model"
 import Slider from "../models/slider.model"
 import { editGroupVerification, groupVerification } from "../utils/verifications"
 import { SliderAttributes } from "../models/slider.model"
+import getSocket from "../socket"
 
 export default class GroupController {
+
+    private socket: ReturnType<typeof getSocket>
+    public constructor(socket: ReturnType<typeof getSocket>) {
+        this.socket = socket
+    }
 
     public getGroups = async (req: Request, res: Response): Promise<any> => {
         let groups = await Group.findAll()
 
         res.json({
             type: "success",
-            groups
+            groups: await Promise.all(groups.map(async group => ({
+                ...group.toJSON(),
+                slides: (await group.getGroupSliders()).length
+            })))
         })
     }
 
@@ -64,7 +73,10 @@ export default class GroupController {
 
         res.json({
             type: "success",
-            message: "Le groupe a bien été créé."
+            group: {
+                ...group.toJSON(),
+                slides: (await group.getGroupSliders()).length
+            }
         })
     }
 
@@ -76,6 +88,7 @@ export default class GroupController {
         if (errors.length) return res.status(400).json({ type: "error", errors })
 
         if (req.body.label) group.label = req.body.label
+        await group.save()
 
         let s = req.body.sliders as number[]
         let gSliders = await group.getGroupSliders()
@@ -103,6 +116,8 @@ export default class GroupController {
             }
         }))
 
+        this.socket.emit("groupChange", group.id)
+
         res.json({
             type: "success",
             message: "Le groupe a bien été modifié."
@@ -114,6 +129,8 @@ export default class GroupController {
         if (!group) return res.status(400).json({ type: "error", errors: ["Le groupe n'existe pas."] })
 
         await group.destroy()
+
+        this.socket.emit("groupDelete", group.id)
 
         res.json({
             type: "success",
