@@ -3,32 +3,51 @@ import { Request, Response } from "express"
 import Slider from "../models/slider.model"
 import { sliderVerification } from "../utils/verifications"
 import { randomUUID } from "crypto"
+import getSocket from "../socket"
 
 export default class SliderController {
+
+    private socket: ReturnType<typeof getSocket>
+    public constructor(socket: ReturnType<typeof getSocket>) {
+        this.socket = socket
+    }
+    
     public createSlider = async (req: Request, res: Response) => {
         let errors = await sliderVerification(req)
         if (errors.length) return res.status(400).json({ type: "error", errors })
-        if (!req.files || !req.files["media"]) return res.status(400).json({ type: "error", errors: ["Le media est obligatoire."] })
+        if (!req.body.title && (!req.files || !req.files["media"])) return res.status(400).json({type: "error", errors: ["Le titre ou le média est obligatoire."]})
 
-        let media = req.files["media"]
-        if (Array.isArray(media)) return res.status(400).json({ type: "error", errors: ["Le media ne doit contenir qu'un fichier."] })
-        if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["Le media ne peut être qu'une image ou vidéo."] })
-        
-        let extension = media.name.split(".").pop()
-        let mediaName = `${randomUUID()}${extension ? `.${extension}` : ""}`
-        !fs.existsSync(`./cdn`) && fs.mkdirSync(`./cdn`) 
-        await media.mv(`./cdn/${mediaName}`)
+        let mediaName: string | undefined = undefined
+        let mediaType: "image" | "video" | undefined = undefined 
+
+        if (req.files && req.files["media"]) {
+            let media = req.files["media"]
+            if (Array.isArray(media)) return res.status(400).json({ type: "error", errors: ["Le media ne doit contenir qu'un fichier."] })
+            if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["Le media ne peut être qu'une image ou vidéo."] })
+            
+            let extension = media.name.split(".").pop()
+            mediaName = `${randomUUID()}${extension ? `.${extension}` : ""}`
+            mediaType = media.mimetype.startsWith("image/") ? "image" : "video"
+            !fs.existsSync(`./cdn`) && fs.mkdirSync(`./cdn`) 
+            await media.mv(`./cdn/${mediaName}`)
+        }
 
         let slider = await Slider.create({
             label: req.body.label,
             title: req.body.title,
             mediaSource: mediaName,
-            mediaType: media.mimetype.startsWith("image/") ? "image" : "video"
+            mediaType: mediaType
         })
 
         res.send({
             type: "success",
             slider
+        })
+    }
+    public getSliders = async (req: Request, res: Response) => {        
+        res.send({
+            type: "success",
+            sliders: await Slider.findAll()
         })
     }
     public getSlider = async (req: Request, res: Response) => {
@@ -52,14 +71,23 @@ export default class SliderController {
             if (!media.mimetype.startsWith("image/") && !media.mimetype.startsWith("video/")) return res.status(400).json({ type: "error", errors: ["Le media ne peut être qu'une image ou vidéo."] })
 
             let extension = media.name.split(".").pop()
-            let mediaName = `${slider.mediaSource.split(".").shift()}${extension ? `.${extension}` : ""}`
-            fs.rmSync(`./cdn/${slider.mediaSource}`)
+            let mediaName = `${slider.mediaSource ? slider.mediaSource.split(".").shift() : randomUUID()}${extension ? `.${extension}` : ""}`
+            fs.existsSync(`./cdn/${slider.mediaSource}`) && fs.rmSync(`./cdn/${slider.mediaSource}`)
             await media.mv(`./cdn/${mediaName}`)
             slider.mediaSource = mediaName
             slider.mediaType = media.mimetype.startsWith("image/") ? "image" : "video"
         }
 
         await slider.save()
+
+        let gSliders = await slider.getGroupSliders()
+        await Promise.all(gSliders.map(async gSlider => {
+            let group = await gSlider.getGroup()
+            if (!group) return
+
+            this.socket.emit("groupChange", group.id)
+        }))
+
         res.send({
             type: "success",
             slider

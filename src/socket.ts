@@ -3,18 +3,17 @@ import * as http from "http"
 import * as express from "express"
 
 interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
+    groupChange: (id: number) => void;
+    groupDelete: (id: number) => void;
 }
 
 interface ClientToServerEvents {
-    hello: () => void;
 }
 
-export default (app: express.Application) => {
-    let server = http.createServer(app)
+const getSocket = (server: http.Server) => {
     let io = new Server<ClientToServerEvents, ServerToClientEvents>(server)
 
     return io
 }
+
+export default getSocket

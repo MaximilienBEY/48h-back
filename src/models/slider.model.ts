@@ -6,9 +6,9 @@ import GroupSlider from './group.slider.model'
 export interface SliderAttributes {
     id: number
     label: string
-    title: string
-    mediaType: "image" | "video"
-    mediaSource: string
+    title?: string
+    mediaType?: "image" | "video"
+    mediaSource?: string
 }
 
 @Table({
@@ -19,17 +19,17 @@ export default class Slider extends Model<ModelAttribute<SliderAttributes>, Omit
     @Column
     label!: string
     
-    @AllowNull(false)
+    @AllowNull(true)
     @Column
-    title!: string
+    title?: string
     
-    @AllowNull(false)
+    @AllowNull(true)
     @Column
-    mediaType!: string
+    mediaType?: string
     
-    @AllowNull(false)
+    @AllowNull(true)
     @Column
-    mediaSource!: string    
+    mediaSource?: string    
 
     @HasMany(() => GroupSlider, {
         onDelete: "CASCADE"

@@ -11,8 +11,6 @@ export const sliderVerification = async (req: Request): Promise<string[]> => {
     const errors: string[] = []
 
     if(!req.body.label) errors.push("Le label est obligatoire.")
-    if(!req.body.title) errors.push("Le titre est obligatoire.")
-    if (!Object.keys(req.files ?? {}).includes("media")) errors.push("Le media est obligatoire.")
 
     return errors
 }
@@ -28,6 +26,9 @@ export const groupVerification = async (req: Request): Promise<string[]> => {
     const errors: string[] = []
 
     if(!req.body.label) errors.push("Le label est obligatoire.")
+    
+    if (!req.body.sliders) req.body.sliders = req.body["sliders[]"]
+    if (!Array.isArray(req.body.sliders)) req.body.sliders = [req.body.sliders]
     if(!req.body.sliders || !Array.isArray(req.body.sliders)) errors.push("Les sliders sont obligatoires.")
     else {
         req.body.sliders = req.body.sliders.map((s: string) => parseInt(s)).filter((id: number, i: number, self: number[]) => self.indexOf(id) === i)
@@ -40,6 +41,8 @@ export const groupVerification = async (req: Request): Promise<string[]> => {
 export const editGroupVerification = async (req: Request): Promise<string[]> => {
     const errors: string[] = []
 
+    if (!req.body.sliders) req.body.sliders = req.body["sliders[]"]
+    if (!Array.isArray(req.body.sliders)) req.body.sliders = [req.body.sliders]
     if(!req.body.sliders || !Array.isArray(req.body.sliders)) errors.push("Les sliders sont obligatoires.")
     else {
         req.body.sliders = req.body.sliders.map((s: string) => parseInt(s)).filter((id: number, i: number, self: number[]) => self.indexOf(id) === i)

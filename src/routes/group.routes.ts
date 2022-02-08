@@ -2,10 +2,11 @@ import GroupController from "../controllers/group.controller"
 import { Router } from "express"
 import * as core from 'express-serve-static-core'
 import { AuthMiddleware } from "../middlewares/auth.middleware"
+import getSocket from "../socket"
 
-export default (): core.Router => {
+const groupRoutes = (socket: ReturnType<typeof getSocket>): core.Router => {
     const router: core.Router = Router()
-    const Controller = new GroupController()
+    const Controller = new GroupController(socket)
 
     router.get("/groups", Controller.getGroups)
     router.post("/groups", [AuthMiddleware], Controller.createGroup)
@@ -15,3 +16,5 @@ export default (): core.Router => {
 
     return router
 }
+
+export default groupRoutes

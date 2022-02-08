@@ -4,12 +4,12 @@ import authRoutes from "./routes/auth.routes"
 import sliderRoutes from "./routes/slider.routes"
 
 const server = new Server([
-    groupRoutes(),
-    authRoutes(),
-    sliderRoutes()
+    groupRoutes,
+    authRoutes,
+    sliderRoutes
 ], {
     logging: true,
-    force: true
+    // force: true
 })
 
 server.listen()
